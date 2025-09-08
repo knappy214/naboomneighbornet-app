@@ -13,7 +13,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (user) { setFirst(user.first_name || ""); setLast(user.last_name || ""); setPhone(user.phone || ""); }
-  }, [user?.id]);
+  }, [user]);
 
   async function onSave() {
     if (!(await requireBiometric("Authenticate to save profile"))) return;

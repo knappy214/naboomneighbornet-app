@@ -11,7 +11,7 @@ export async function requireBiometric(reason = "Confirm your identity") {
     if (!hw || !enrolled) return true;
     const res = await LocalAuthentication.authenticateAsync({ 
       promptMessage: reason, 
-      fallbackEnabled: true, 
+      fallbackLabel: "Use Passcode",
       cancelLabel: "Cancel" 
     });
     return !!res.success;

@@ -1,32 +1,19 @@
+import { Button, Layout } from '@ui-kitten/components';
 import { Link, Stack } from 'expo-router';
-import { StyleSheet } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '../src/ui/components/ThemedText';
 
 export default function NotFoundScreen() {
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen does not exist.</ThemedText>
-        <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
-        </Link>
-      </ThemedView>
+      <Layout style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+        <ThemedText category="h4" style={{ marginBottom: 16 }}>This screen does not exist.</ThemedText>
+        <Button>
+          <Link href="/">
+            <ThemedText category="s1" variant="primary">Go to home screen!</ThemedText>
+          </Link>
+        </Button>
+      </Layout>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});

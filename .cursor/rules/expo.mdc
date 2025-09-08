@@ -1,0 +1,114 @@
+---
+
+description: Expo SDK 53 – NeighborNet standards and guardrails
+globs:
+*"app/\*\*",
+*"src/\*\*",
+*"eas.json",
+*"app.config.\*",
+
+alwaysApply: true
+
+---
+
+# Coding Standards (Expo SDK 53)
+
+**Goal:** Keep the Expo app consistent with the web project’s API patterns and brand system, using the latest **stable** Expo SDK (53) unless explicitly instructed to target a beta.
+
+## Runtime & Tooling
+
+* Use **Expo SDK 53** (stable). Avoid SDK 54 **beta** unless requested.
+* Require **Node ≥ 20**. Prefer `pnpm` or `npm` with lockfile committed.
+* Use **TypeScript** with `strict` enabled.
+
+## Architecture
+
+* Use **expo-router** for navigation.
+* Data fetching/mutations **must** go through **@tanstack/react-query**.
+* Screens/components must **not** call `fetch` directly.
+* Keep server interactions in `src/api/*`; React Query hooks in `src/queries/*`.
+
+## Networking
+
+* Use `src/api/http.ts` for base HTTP with `Accept: application/json` and `Accept-Language` headers.
+* Use `src/api/authFetch.ts` for authenticated requests with **one 401 retry** via `/auth/jwt/refresh`; on failure, clear tokens.
+* Attach `Authorization: Bearer <access>` for private endpoints.
+* Respect backend locale via `Accept-Language: en | af-ZA`.
+
+## Authentication
+
+* Implement `POST /auth/jwt/create` and `POST /auth/jwt/refresh`.
+* Persist `access` and `refresh` in **expo-secure-store** only.
+* Never store tokens in AsyncStorage or redux state.
+
+## User Profile
+
+* Implement `GET /users/me` and `PATCH /users/me`.
+* Expose hooks: `useMe`, `useUpdateProfile`. Invalidate `['me']` on success.
+* Use **biometric re‑auth** before sensitive actions (profile save, logout, password change).
+
+## React Query
+
+* Default query options: `staleTime: 30_000`, `gcTime: 300_000`, `retry: 1`.
+* Mutation `retry: 0`.
+* Keys: `['me']` for profile; use arrays, never string keys.
+* Do not use SWR or custom caches.
+
+## Security
+
+* **Biometrics**: use `expo-local-authentication` via `requireBiometric()` helper.
+
+  * Fail closed on user cancel; do not proceed.
+  * Proceed when hardware/enrollment not available (configurable).
+* Strip PII from error messages; prefer safe summaries.
+
+## Theming & i18n
+
+* UI Kitten themes must map the brand tokens:
+
+  * Light: `color-primary-500` = brand.primary, `color-info-500` = brand.secondary, `color-warning-500` = brand.accent.
+  * Dark: same mapping using dark brand values.
+* Triple switcher: **light → dark → system**.
+* i18n via `i18n-js` with `en` and `af`; headers reflect current locale.
+
+## Env & Builds
+
+* Read API bases from `EXPO_PUBLIC_API_BASE` and `EXPO_PUBLIC_API_V2_BASE`.
+* Provide EAS profiles for **development**, **staging**, **production**.
+* Do not hardcode URLs in components or hooks.
+
+## Testing
+
+* Use **Jest** with `ts-jest` and `jest-fetch-mock`.
+* Required tests:
+
+  * 401 refresh flow (`authFetch`)
+  * `auth.login` stores tokens
+  * `user.getProfile` includes `Authorization` header
+* Mock `expo-secure-store` and `expo-local-authentication` in setup.
+
+## Code Style
+
+* Functional components only; keep components < 200 LoC when possible.
+* Keep comments short and explain **why**, not what.
+* No `any`. Type narrow server DTOs in `src/api/*`.
+* Prettier + ESLint recommended; prefer early returns over deep nesting.
+
+## UX
+
+* Show loading and error states for all queries/mutations.
+* Disable submit buttons during pending states.
+* Use accessible labels/roles where applicable.
+
+## Examples
+
+* Refer to: `@src/api/authFetch.ts`, `@src/queries/profile.ts`, `@src/security/biometric.ts`, `@src/ui/themes.ts`.
+
+## PR Checklist (auto-apply in reviews)
+
+* [ ] Added/updated tests for API/auth changes
+* [ ] No direct `fetch` in screens
+* [ ] Uses React Query keys (arrays) and invalidates on mutation
+* [ ] Biometric prompt enforced where needed
+* [ ] Env vars read from `EXPO_PUBLIC_*`
+* [ ] Brand/theme unchanged or updated consistently in both light & dark

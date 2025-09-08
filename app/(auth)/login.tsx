@@ -10,7 +10,7 @@ export default function Login() {
   const { data: user } = useMe();
   const login = useLogin();
 
-  useEffect(() => { if (user) router.replace("/(tabs)"); }, [user?.id]);
+  useEffect(() => { if (user) router.replace("/(tabs)"); }, [user]);
 
   async function submit() { await login.mutateAsync({ email, password }); }
 

@@ -1,30 +1,41 @@
+import * as eva from '@eva-design/eva';
+import { ApplicationProvider } from '@ui-kitten/components';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Appearance } from 'react-native';
+import { ThemeName, themes } from './themes';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
-interface ThemeContextType {
+interface CustomThemeContextType {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
   isDark: boolean;
+  currentTheme: ThemeName;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const CustomThemeContext = createContext<CustomThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<ThemeMode>('system');
   const [isDark, setIsDark] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<ThemeName>('light');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const updateTheme = () => {
       if (mode === 'system') {
-        setIsDark(Appearance.getColorScheme() === 'dark');
+        const systemIsDark = Appearance.getColorScheme() === 'dark';
+        setIsDark(systemIsDark);
+        setCurrentTheme(systemIsDark ? 'dark' : 'light');
       } else {
-        setIsDark(mode === 'dark');
+        const isDarkMode = mode === 'dark';
+        setIsDark(isDarkMode);
+        setCurrentTheme(isDarkMode ? 'dark' : 'light');
       }
     };
 
     updateTheme();
+    setIsInitialized(true);
 
     if (mode === 'system') {
       const subscription = Appearance.addChangeListener(updateTheme);
@@ -32,17 +43,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [mode]);
 
+  const theme = themes[currentTheme] || eva.light;
+
+  // Don't render until theme is initialized to prevent undefined errors
+  if (!isInitialized) {
+    return null;
+  }
+
   return (
-    <ThemeContext.Provider value={{ mode, setMode, isDark }}>
-      {children}
-    </ThemeContext.Provider>
+    <CustomThemeContext.Provider value={{ mode, setMode, isDark, currentTheme }}>
+      <ApplicationProvider {...eva.light} theme={theme}>
+        {children}
+      </ApplicationProvider>
+    </CustomThemeContext.Provider>
   );
 }
 
 export function useThemeCtx() {
-  const context = useContext(ThemeContext);
+  const context = useContext(CustomThemeContext);
   if (context === undefined) {
     throw new Error('useThemeCtx must be used within a ThemeProvider');
   }
   return context;
 }
+
+// Export UI Kitten's useTheme hook for direct theme access
+export { useTheme } from '@ui-kitten/components';
+
