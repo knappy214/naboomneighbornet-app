@@ -6,7 +6,6 @@ import { PerformanceOptimizedLayout } from "../../src/ui/components/PerformanceO
 import { ThemedButton } from "../../src/ui/components/ThemedButton";
 import { ThemedText } from "../../src/ui/components/ThemedText";
 
-import { AuthGate } from '../../src/ui/components/AuthGate';
 export default function TabsLayout() {
   const { mode, setMode } = useThemeCtx();
   
@@ -20,7 +19,6 @@ export default function TabsLayout() {
   
   return (
     <>
-      <AuthGate>
       <Stack screenOptions={{ 
         header: () => (
           <PerformanceOptimizedLayout style={{ 
@@ -52,7 +50,6 @@ export default function TabsLayout() {
           </PerformanceOptimizedLayout>
         ),
       }} />
-    </AuthGate>
     </>
   );
 }

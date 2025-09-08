@@ -1,11 +1,11 @@
 import * as eva from "@eva-design/eva";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { AuthProvider } from '../src/context/AuthProvider';
-import { QueryProvider } from '../src/context/QueryProvider';
+import { queryClient } from "../src/api/queryClient";
 import { ThemeProvider, useThemeCtx } from "../src/ui/ThemeProvider";
 
 function AppContent() {
@@ -14,16 +14,13 @@ function AppContent() {
   return (
     <>
       <StatusBar style={isDark ? "light" : "dark"} />
-      
-    <QueryProvider>
-      <AuthProvider>
+      <QueryClientProvider client={queryClient}>
         <Stack
           screenOptions={{
             headerShown: false,
           }}
         />
-        </AuthProvider>
-      </QueryProvider>
+      </QueryClientProvider>
     </>
   );
 }
