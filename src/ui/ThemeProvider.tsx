@@ -1,5 +1,4 @@
 import * as eva from '@eva-design/eva';
-import { ApplicationProvider } from '@ui-kitten/components';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Appearance } from 'react-native';
 import { ThemeName, themes } from './themes';
@@ -11,6 +10,7 @@ interface CustomThemeContextType {
   setMode: (mode: ThemeMode) => void;
   isDark: boolean;
   currentTheme: ThemeName;
+  theme: any;
 }
 
 const CustomThemeContext = createContext<CustomThemeContextType | undefined>(undefined);
@@ -51,10 +51,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <CustomThemeContext.Provider value={{ mode, setMode, isDark, currentTheme }}>
-      <ApplicationProvider {...eva.light} theme={theme}>
-        {children}
-      </ApplicationProvider>
+    <CustomThemeContext.Provider value={{ mode, setMode, isDark, currentTheme, theme }}>
+      {children}
     </CustomThemeContext.Provider>
   );
 }

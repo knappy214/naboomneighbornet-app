@@ -46,8 +46,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     // Fallbacks if EXPO_PUBLIC_* are not set
-    apiBase: process.env.EXPO_PUBLIC_API_BASE || "https://dev.example.com/api",
-    apiV2Base: process.env.EXPO_PUBLIC_API_V2_BASE || "https://dev.example.com/api/v2",
+    apiBase: process.env.EXPO_PUBLIC_API_BASE || "https://jsonplaceholder.typicode.com",
+    apiV2Base: process.env.EXPO_PUBLIC_API_V2_BASE || "https://jsonplaceholder.typicode.com",
     brand: {
       light: { primary: "#4b6bfb", secondary: "#047aff", accent: "#f97316" },
       dark: { primary: "#60a5fa", secondary: "#38bdf8", accent: "#fb923c" }
