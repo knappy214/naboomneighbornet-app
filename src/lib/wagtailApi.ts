@@ -109,7 +109,7 @@ class TokenStore {
       ])
       this.accessToken = a || null
       this.refreshToken = r || null
-    } catch (error) {
+    } catch {
       // SecureStore not available in web environment
       this.accessToken = null
       this.refreshToken = null

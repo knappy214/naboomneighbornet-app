@@ -35,21 +35,21 @@ app/                     # expo-router routes
   (tabs)/profile.tsx
   _layout.tsx
 src/
-  api/
-    http.ts             # base fetch with Accept-Language
-    auth.ts             # login/refresh/token storage
-    authFetch.ts        # 401-aware fetch (silent refresh once)
-    user.ts             # getProfile/updateProfile
-    content.ts          # Wagtail v2 pages
-    queryClient.ts
-  queries/
-    auth.ts             # useLogin mutation
-    profile.ts          # useMe/useUpdateProfile
+  context/
+    AuthProvider.tsx
+    QueryProvider.tsx
+  hooks/
+    authMutations.ts    # login/change-password
+    profileMutations.ts # update profile
+    useList.ts          # generic list fetcher
+    useMe.ts            # current user query
   i18n/
     index.ts            # i18n-js setup + helpers
   security/biometric.ts # biometric re-auth helper
-  state/
-    auth.ts             # (optional) Zustand store
+  lib/
+    query.ts            # React Query client
+    schemas.ts          # zod schemas
+    wagtailApi.ts       # Wagtail API client
   ui/
     theme-tokens.ts     # brand colors -> tokens
     themes.ts           # UI Kitten light/dark overrides
@@ -153,9 +153,9 @@ Behavior:
 
 ## React Query Usage
 
-* `useMe()` fetches and caches the current user under key `['me']`.
-* `useUpdateProfile()` mutates user fields and invalidates `['me']`.
-* `useLogin()` logs in and invalidates `['me']` to refresh UI.
+* `useMeQuery()` fetches and caches the current user under key `['me']`.
+* `useProfileUpdateMutation()` mutates user fields and invalidates `['me']`.
+* `useLoginMutation()` logs in and invalidates `['me']` to refresh UI.
 
 > Default options: `staleTime: 30s`, `gcTime: 5m`, `retry: 1` on queries, `0` on mutations.
 
@@ -180,9 +180,9 @@ npm test
 
 Unit tests cover:
 
-* 401 refresh flow in `authFetch`
-* Token persistence in `auth.login`
-* `Authorization` propagation in `user.getProfile`
+* JWT refresh flow in `wagtailApi`
+* Token persistence in `AuthProvider`
+* `Authorization` header propagation in requests
 
 ---
 
