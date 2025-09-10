@@ -10,7 +10,7 @@ export function useMeQuery(enabled = true) {
     queryKey: ['me'],
     enabled: enabled && api.hasAuth(),
     queryFn: async () => {
-      const data = await ProfileApi.get({ fields: ['id', 'email', 'avatar_info', 'stats'] })
+      const data = await ProfileApi.get({ fields: ['id', 'email', 'avatar_info', 'stats', 'first_name', 'last_name', 'phone'] })
       return ProfileSchema.parse(data)
     },
   })

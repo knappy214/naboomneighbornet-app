@@ -1,11 +1,12 @@
 import { Button, Input, Layout, Text } from "@ui-kitten/components";
 import { useEffect, useState } from "react";
-import { useMe, useUpdateProfile } from "../../src/queries/profile";
+import { useMeQuery } from "../../src/hooks/useMe";
+import { useProfileUpdateMutation } from "../../src/hooks/profileMutations";
 import { requireBiometric } from "../../src/security/biometric";
 
 export default function Profile() {
-  const { data: user, isLoading } = useMe();
-  const update = useUpdateProfile();
+  const { data: user, isLoading } = useMeQuery();
+  const update = useProfileUpdateMutation();
 
   const [first, setFirst] = useState("");
   const [last, setLast] = useState("");

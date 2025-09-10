@@ -1,14 +1,14 @@
 import { Button, Input, Layout, Text } from "@ui-kitten/components";
 import { Stack, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { useLogin } from "../../src/queries/auth";
-import { useMe } from "../../src/queries/profile";
+import { useLoginMutation } from "../../src/hooks/authMutations";
+import { useMeQuery } from "../../src/hooks/useMe";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { data: user } = useMe();
-  const login = useLogin();
+  const { data: user } = useMeQuery();
+  const login = useLoginMutation();
 
   useEffect(() => { if (user) router.replace("/(tabs)"); }, [user]);
 

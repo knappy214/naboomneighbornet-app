@@ -6,6 +6,9 @@ import { z } from 'zod'
 export const ProfileSchema = z.object({
   id: z.number(),
   email: z.string(),
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
   avatar_info: z.any().nullable().optional(),
   stats: z.any().nullable().optional(),
 }).passthrough()
@@ -28,4 +31,13 @@ export type WagtailList<T> = {
   meta: z.infer<typeof WagtailMetaSchema>
   items: T[]
 }
+
+// Basic Wagtail page shape used in examples
+export const PageSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  meta: z.object({ locale: z.string() }).passthrough(),
+}).passthrough()
+
+export type PageT = z.infer<typeof PageSchema>
 
