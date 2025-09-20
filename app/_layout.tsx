@@ -1,6 +1,5 @@
 import * as eva from "@eva-design/eva";
-import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
-import { EvaIconsPack } from "@ui-kitten/eva-icons";
+import { ApplicationProvider } from "@ui-kitten/components";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
@@ -41,7 +40,6 @@ function ThemedApp() {
 export default function RootLayout() {
   return (
     <>
-      <IconRegistry icons={EvaIconsPack} />
       <ThemeProvider>
         <ThemedApp />
       </ThemeProvider>

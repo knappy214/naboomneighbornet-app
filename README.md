@@ -6,7 +6,7 @@ A production‑ready Expo application aligned with the web app’s API patterns 
 
 ## Highlights
 
-* **Expo SDK 53 (stable)** with **Node ≥ 20**.
+* **Expo SDK 54 (stable)** with **Node ≥ 20**.
 * **Auth**: JWT create/refresh, `Authorization: Bearer`, 401 auto‑refresh once.
 * **Profile**: `GET/PATCH /users/me` with i18n via `Accept-Language` (`en` / `af-ZA`).
 * **Content**: Wagtail `/api/v2/pages` listing for locale validation.
@@ -18,7 +18,7 @@ A production‑ready Expo application aligned with the web app’s API patterns 
 
 ## Tech Stack
 
-* **Expo SDK 53**, **React Native**, **TypeScript**
+* **Expo SDK 54**, **React Native**, **TypeScript**
 * **expo-router**, **@tanstack/react-query**, **expo-secure-store**, **expo-local-authentication**
 * **@ui-kitten/components** (Eva Design System)
 * **i18n-js**, **expo-localization**

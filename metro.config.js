@@ -7,7 +7,6 @@ config.resolver.alias = {
   ...config.resolver.alias,
   '@eva-design/eva': '@eva-design/eva',
   '@ui-kitten/components': '@ui-kitten/components',
-  '@ui-kitten/eva-icons': '@ui-kitten/eva-icons',
 };
 
 // Enable tree shaking for better performance
