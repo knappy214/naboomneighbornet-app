@@ -13,7 +13,7 @@ const router = useRouter()
 
 
 useEffect(() => {
-if (!loading && !authed) router.replace('/login')
+if (!loading && !authed) router.replace('/(auth)/login')
 }, [authed, loading, router])
 
 

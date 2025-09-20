@@ -22,16 +22,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<ProfileT | null>(null)
 
   const hydrate = useCallback(async () => {
+    console.log('🔄 AuthProvider: Starting hydration...')
     await api.ready
+    console.log('🔑 AuthProvider: API ready, hasAuth:', api.hasAuth())
+    
     if (!api.hasAuth()) {
+      console.log('❌ AuthProvider: No auth token, setting user to null')
       setUser(null)
       setLoading(false)
       return
     }
+    
     try {
+      console.log('📡 AuthProvider: Fetching user profile...')
       const me = await ProfileApi.get({ fields: ['id', 'email', 'avatar_info', 'stats'] })
+      console.log('✅ AuthProvider: Profile fetched successfully:', me)
       setUser(me)
-    } catch {
+    } catch (error) {
+      console.error('❌ AuthProvider: Error fetching profile:', error)
+      console.error('❌ AuthProvider: Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        status: error instanceof Error && 'status' in error ? (error as any).status : 'Unknown',
+        data: error instanceof Error && 'data' in error ? (error as any).data : 'Unknown'
+      })
       setUser(null)
     } finally {
       setLoading(false)

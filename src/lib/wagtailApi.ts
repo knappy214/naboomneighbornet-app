@@ -33,7 +33,7 @@ function ensureBase(url: string | undefined, fallback: string): string {
 }
 
 const API_BASE = ensureBase(RAW_API_BASE, 'https://naboomneighbornet.net.za/api')
-const API_V2_BASE = ensureBase(RAW_API_V2_BASE, API_BASE + '/v2')
+const API_V2_BASE = ensureBase(RAW_API_V2_BASE, 'https://naboomneighbornet.net.za/api/v2')
 
 // Language header: match Vue app behavior: 'af-ZA' when locale starts with 'af', else 'en'
 function languageHeader(): string {
@@ -122,21 +122,36 @@ class TokenStore {
   async setTokens(tokens: Partial<JwtPair>): Promise<void> {
     if (typeof tokens.access === 'string') {
       this.accessToken = tokens.access
-      await SecureStore.setItemAsync(TOKEN_KEYS.access, tokens.access)
+      try {
+        await SecureStore.setItemAsync(TOKEN_KEYS.access, tokens.access)
+      } catch {
+        // SecureStore not available in web environment, store in memory only
+        console.log('SecureStore not available, storing tokens in memory only')
+      }
     }
     if (typeof tokens.refresh === 'string') {
       this.refreshToken = tokens.refresh
-      await SecureStore.setItemAsync(TOKEN_KEYS.refresh, tokens.refresh)
+      try {
+        await SecureStore.setItemAsync(TOKEN_KEYS.refresh, tokens.refresh)
+      } catch {
+        // SecureStore not available in web environment, store in memory only
+        console.log('SecureStore not available, storing tokens in memory only')
+      }
     }
   }
 
   async clear(): Promise<void> {
     this.accessToken = null
     this.refreshToken = null
-    await Promise.all([
-      SecureStore.deleteItemAsync(TOKEN_KEYS.access),
-      SecureStore.deleteItemAsync(TOKEN_KEYS.refresh),
-    ])
+    try {
+      await Promise.all([
+        SecureStore.deleteItemAsync(TOKEN_KEYS.access),
+        SecureStore.deleteItemAsync(TOKEN_KEYS.refresh),
+      ])
+    } catch {
+      // SecureStore not available in web environment, just clear memory
+      console.log('SecureStore not available, cleared tokens from memory only')
+    }
   }
 }
 
@@ -172,9 +187,28 @@ class WagtailApi {
   async login(email: string, password: string): Promise<JwtPair> {
     const url = joinUrl(this.apiBase, '/auth/jwt/create/')
     const res = await this.rawFetch('POST', url, { email, password })
+    
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => null)
+      throw new ApiError(res.status, errorData, errorData?.detail || 'Login failed')
+    }
+    
     const { access, refresh } = (await res.json()) as JwtPair
     await this.tokens.setTokens({ access, refresh })
     return { access, refresh }
+  }
+
+  private async mockLogin(email: string, password: string): Promise<JwtPair> {
+    // Simple mock authentication for development
+    if (email === 'test@example.com' && password === 'password') {
+      const mockTokens = {
+        access: 'mock-access-token-' + Date.now(),
+        refresh: 'mock-refresh-token-' + Date.now()
+      }
+      await this.tokens.setTokens(mockTokens)
+      return mockTokens
+    }
+    throw new ApiError(401, null, 'Invalid credentials (mock auth)')
   }
 
   async logout(): Promise<void> {
@@ -203,15 +237,21 @@ class WagtailApi {
     const base = trimSlashes(opts.baseURL || this.apiV2Base)
     const url = joinUrl(base, path) + buildQS(opts.query)
 
+    console.log(`🌐 API Request: ${method} ${url}`)
     const res = await this.authorizedFetch(method, url, opts)
+    console.log(`📡 API Response: ${res.status} ${res.statusText}`)
 
     if (res.status === 401 && (opts.retryOn401 ?? true)) {
+      console.log('🔄 API: 401 received, attempting token refresh...')
       const refreshed = await this.tryRefreshAccess()
       if (refreshed) {
+        console.log('✅ API: Token refreshed, retrying request...')
         const retry = await this.authorizedFetch(method, url, { ...opts, retryOn401: false })
+        console.log(`📡 API Retry Response: ${retry.status} ${retry.statusText}`)
         return this.handleJson<T>(retry)
       }
       // At this point auth is invalid; reset and notify.
+      console.log('❌ API: Token refresh failed, clearing tokens and emitting unauthorized')
       await this.tokens.clear()
       this.emitUnauthorized()
       throw new ApiError(401, null, 'Unauthorized')
