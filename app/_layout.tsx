@@ -4,6 +4,9 @@ import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
+
+import '../src/tasks/location';
+
 import { AuthProvider } from '../src/context/AuthProvider';
 import { QueryProvider } from '../src/context/QueryProvider';
 import { ThemeProvider, useThemeCtx } from "../src/ui/ThemeProvider";
