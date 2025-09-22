@@ -1,6 +1,6 @@
 import { Button, Input, Layout, Text } from "@ui-kitten/components";
 import { Stack, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLoginMutation } from "../../src/hooks/authMutations";
 import { useMeQuery } from "../../src/hooks/useMe";
 
@@ -9,8 +9,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const { data: user } = useMeQuery();
   const login = useLoginMutation();
+  const hasRedirected = useRef(false);
 
-  useEffect(() => { if (user) router.replace("/(tabs)"); }, [user]);
+  useEffect(() => { 
+    if (user && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.replace("/(tabs)");
+    }
+  }, [user]);
 
   async function submit() { 
     try {
