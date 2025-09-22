@@ -30,7 +30,7 @@ export default function TabsLayout() {
             justifyContent: "space-between" 
           }}>
             <ThemedText category="s1" variant="primary">
-              NeighborNet ({i18n.locale})
+              Naboom NeighborNet ({i18n.locale})
             </ThemedText>
             <Layout style={{ flexDirection: "row", gap: 8 }}>
               <ThemedButton 

@@ -6,11 +6,12 @@ A production‑ready Expo application aligned with the web app’s API patterns 
 
 ## Highlights
 
-* **Expo SDK 53 (stable)** with **Node ≥ 20**.
+* **Expo SDK 54 (stable)** with **Node ≥ 20**.
 * **Auth**: JWT create/refresh, `Authorization: Bearer`, 401 auto‑refresh once.
 * **Profile**: `GET/PATCH /users/me` with i18n via `Accept-Language` (`en` / `af-ZA`).
 * **Content**: Wagtail `/api/v2/pages` listing for locale validation.
 * **State**: React Query for data; optional Zustand for auth UI state.
+* **Panic & Tracking**: SOS location pings, patrol tracker background task, optional Nearby Relay mode.
 * **Security**: Tokens in `expo-secure-store`; **biometric prompt** before sensitive mutations.
 * **Branding**: UI Kitten themes derived from Community Security colors (Light/Dark) + triple theme switch (light/dark/system).
 
@@ -18,8 +19,8 @@ A production‑ready Expo application aligned with the web app’s API patterns 
 
 ## Tech Stack
 
-* **Expo SDK 53**, **React Native**, **TypeScript**
-* **expo-router**, **@tanstack/react-query**, **expo-secure-store**, **expo-local-authentication**
+* **Expo SDK 54**, **React Native**, **TypeScript**
+* **expo-router**, **@tanstack/react-query**, **expo-secure-store**, **expo-local-authentication**, **expo-location**, **expo-notifications**, **expo-task-manager**
 * **@ui-kitten/components** (Eva Design System)
 * **i18n-js**, **expo-localization**
 * **Jest** (+ Testing Library) for unit tests
@@ -64,28 +65,42 @@ Set env per build profile (EAS or `.env` via `app.config.ts`).
 
 * `EXPO_PUBLIC_API_BASE` – REST base (e.g. `https://api.example.com/api`)
 * `EXPO_PUBLIC_API_V2_BASE` – Wagtail v2 (e.g. `https://api.example.com/api/v2`)
+* `EXPO_PUBLIC_ENABLE_TRACKING` – `'1'` to expose the vehicle tracker UI.
+* `EXPO_PUBLIC_ENABLE_RELAY` – `'1'` to enable Nearby Relay (Dev Client builds only).
+* `EXPO_PUBLIC_VEHICLE_TOKEN` – Optional token for authenticated patrol pings.
 
 ```json
 // eas.json (excerpt)
 {
   "build": {
-    "development": {
+    "preview": {
       "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": false },
       "env": {
         "EXPO_PUBLIC_API_BASE": "https://dev.api.naboomneighbornet.com/api",
-        "EXPO_PUBLIC_API_V2_BASE": "https://dev.api.naboomneighbornet.com/api/v2"
-      }
-    },
-    "staging": {
-      "env": {
-        "EXPO_PUBLIC_API_BASE": "https://staging.api.naboomneighbornet.com/api",
-        "EXPO_PUBLIC_API_V2_BASE": "https://staging.api.naboomneighbornet.com/api/v2"
+        "EXPO_PUBLIC_API_V2_BASE": "https://dev.api.naboomneighbornet.com/api/v2",
+        "EXPO_PUBLIC_VEHICLE_TOKEN": "<dev-vehicle-token>",
+        "EXPO_PUBLIC_ENABLE_TRACKING": "1"
       }
     },
     "production": {
+      "distribution": "store",
       "env": {
         "EXPO_PUBLIC_API_BASE": "https://api.naboomneighbornet.com/api",
         "EXPO_PUBLIC_API_V2_BASE": "https://api.naboomneighbornet.com/api/v2"
+      }
+    },
+    "dev-relay": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": false },
+      "env": {
+        "EXPO_PUBLIC_API_BASE": "https://staging.api.naboomneighbornet.com/api",
+        "EXPO_PUBLIC_API_V2_BASE": "https://staging.api.naboomneighbornet.com/api/v2",
+        "EXPO_PUBLIC_ENABLE_RELAY": "1",
+        "EXPO_PUBLIC_ENABLE_TRACKING": "1"
       }
     }
   }
@@ -124,7 +139,8 @@ npx create-expo-app@latest neighbornet-app
 cd neighbornet-app
 
 # Packages
-npx expo install expo-secure-store expo-localization expo-local-authentication
+npx expo install expo-secure-store expo-localization expo-local-authentication \
+  expo-location expo-notifications expo-task-manager
 npm i @tanstack/react-query @ui-kitten/components @eva-design/eva @ui-kitten/eva-icons i18n-js zustand
 npx expo install react-native-svg
 
