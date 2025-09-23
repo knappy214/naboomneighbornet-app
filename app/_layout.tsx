@@ -1,7 +1,7 @@
 import * as eva from "@eva-design/eva";
 import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
-import { EvaIconsPack } from "@ui-kitten/eva-icons";
-import { Stack } from "expo-router";
+import { EvaIconsPack } from '@ui-kitten/eva-icons';
+import { Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 
@@ -9,6 +9,7 @@ import '../src/tasks/location';
 
 import { AuthProvider } from '../src/context/AuthProvider';
 import { QueryProvider } from '../src/context/QueryProvider';
+import { ErrorBoundary } from '../src/ui/components/ErrorBoundary';
 import { ThemeProvider, useThemeCtx } from "../src/ui/ThemeProvider";
 
 function AppContent() {
@@ -17,16 +18,13 @@ function AppContent() {
   return (
     <>
       <StatusBar style={isDark ? "light" : "dark"} />
-      
-    <QueryProvider>
-      <AuthProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-        </AuthProvider>
-      </QueryProvider>
+      <ErrorBoundary>
+        <QueryProvider>
+          <AuthProvider>
+            <Slot />
+          </AuthProvider>
+        </QueryProvider>
+      </ErrorBoundary>
     </>
   );
 }
@@ -35,19 +33,19 @@ function ThemedApp() {
   const { theme } = useThemeCtx();
   
   return (
-    <ApplicationProvider {...eva} theme={theme}>
-      <AppContent />
-    </ApplicationProvider>
+    <>
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={theme}>
+        <AppContent />
+      </ApplicationProvider>
+    </>
   );
 }
 
 export default function RootLayout() {
   return (
-    <>
-      <IconRegistry icons={EvaIconsPack} />
-      <ThemeProvider>
-        <ThemedApp />
-      </ThemeProvider>
-    </>
+    <ThemeProvider>
+      <ThemedApp />
+    </ThemeProvider>
   );
 }

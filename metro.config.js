@@ -19,4 +19,16 @@ config.transformer.minifierConfig = {
   },
 };
 
+// Fix source map generation issues
+config.transformer.enableBabelRCLookup = false;
+config.transformer.enableBabelRuntime = false;
+
+// Disable source maps in development to avoid symbolication errors
+if (process.env.NODE_ENV === 'development') {
+  config.transformer.minifierConfig = {
+    ...config.transformer.minifierConfig,
+    sourceMap: false,
+  };
+}
+
 module.exports = config;

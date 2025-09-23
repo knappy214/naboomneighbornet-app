@@ -2,10 +2,10 @@
 // src/screens/TrackerScreen.tsx
 // =========================
 import React from 'react'
-import { View, Text, TouchableOpacity } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
-import { useVehicleTracking } from '../hooks/useVehicleTracking'
 import { useRelayMode } from '../hooks/useRelayMode'
+import { useVehicleTracking } from '../hooks/useVehicleTracking'
 
 function Pill({ label }: { label: string }) {
   return (
@@ -53,19 +53,19 @@ export default function TrackerScreen() {
 
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
         {!isTracking ? (
-          <TouchableOpacity
+          <Pressable
             onPress={start}
             style={{ backgroundColor: '#0ea5e9', padding: 14, borderRadius: 10 }}
           >
             <Text style={{ color: 'white', fontWeight: '600' }}>Start Tracking</Text>
-          </TouchableOpacity>
+          </Pressable>
         ) : (
-          <TouchableOpacity
+          <Pressable
             onPress={stop}
             style={{ backgroundColor: '#ef4444', padding: 14, borderRadius: 10 }}
           >
             <Text style={{ color: 'white', fontWeight: '600' }}>Stop Tracking</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
     </View>

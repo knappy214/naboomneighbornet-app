@@ -1,25 +1,24 @@
 ---
 
-description: Expo SDK 53 – NeighborNet standards and guardrails
-globs:
-*"app/\*\*",
-*"src/\*\*",
-*"eas.json",
-*"app.config.\*",
+description: Expo SDK 54 – NeighborNet standards and guardrails globs:
 
-alwaysApply: true
+ "app/\*\*"
+ "src/\*\*"
+ "eas.json"
+ "app.config.\*"
+  alwaysApply: true
 
 ---
 
-# Coding Standards (Expo SDK 53)
+# Coding Standards (Expo SDK 54)
 
 **Goal:** Keep the Expo app consistent with the web project’s API patterns and brand system, using the latest **stable** Expo SDK (53) unless explicitly instructed to target a beta.
 
 ## Runtime & Tooling
 
-* Use **Expo SDK 53** (stable). Avoid SDK 54 **beta** unless requested.
-* Require **Node ≥ 20**. Prefer `pnpm` or `npm` with lockfile committed.
-* Use **TypeScript** with `strict` enabled.
+* Use **Expo SDK 54** (stable). Keep project on the latest stable patch.
+* Require **Node ≥ 20**. Commit a single lockfile.
+* Use **TypeScript** with `strict: true`.
 
 ## Architecture
 
@@ -64,12 +63,99 @@ alwaysApply: true
 
 ## Theming & i18n
 
-* UI Kitten themes must map the brand tokens:
+### Source of truth (OKLCH palettes)
 
-  * Light: `color-primary-500` = brand.primary, `color-info-500` = brand.secondary, `color-warning-500` = brand.accent.
-  * Dark: same mapping using dark brand values.
-* Triple switcher: **light → dark → system**.
-* i18n via `i18n-js` with `en` and `af`; headers reflect current locale.
+**Light**
+
+```
+color-scheme: "light";
+--color-base-100: oklch(100% 0 0);
+--color-base-200: oklch(98% 0 0);
+--color-base-300: oklch(95% 0 0);
+--color-base-content: oklch(21% 0.006 285.885);
+--color-primary: oklch(45% 0.24 277.023);
+--color-primary-content: oklch(93% 0.034 272.788);
+--color-secondary: oklch(65% 0.241 354.308);
+--color-secondary-content: oklch(94% 0.028 342.258);
+--color-accent: oklch(77% 0.152 181.912);
+--color-accent-content: oklch(38% 0.063 188.416);
+--color-neutral: oklch(14% 0.005 285.823);
+--color-neutral-content: oklch(92% 0.004 286.32);
+--color-info: oklch(74% 0.16 232.661);
+--color-info-content: oklch(29% 0.066 243.157);
+--color-success: oklch(76% 0.177 163.223);
+--color-success-content: oklch(37% 0.077 168.94);
+--color-warning: oklch(82% 0.189 84.429);
+--color-warning-content: oklch(41% 0.112 45.904);
+--color-error: oklch(71% 0.194 13.428);
+--color-error-content: oklch(27% 0.105 12.094);
+--radius-selector: 0.5rem; --radius-field: 0.25rem; --radius-box: 0.5rem;
+--size-selector: 0.25rem; --size-field: 0.25rem;
+--border: 1px; --depth: 1; --noise: 0;
+```
+
+**Dark**
+
+```
+color-scheme: "dark";
+--color-base-100: oklch(24.353% 0 0);
+--color-base-200: oklch(22.648% 0 0);
+--color-base-300: oklch(20.944% 0 0);
+--color-base-content: oklch(84.87% 0 0);
+--color-primary: oklch(41.703% 0.099 251.473);
+--color-primary-content: oklch(88.34% 0.019 251.473);
+--color-secondary: oklch(64.092% 0.027 229.389);
+--color-secondary-content: oklch(12.818% 0.005 229.389);
+--color-accent: oklch(67.271% 0.167 35.791);
+--color-accent-content: oklch(13.454% 0.033 35.791);
+--color-neutral: oklch(27.441% 0.013 253.041);
+--color-neutral-content: oklch(85.488% 0.002 253.041);
+--color-info: oklch(62.616% 0.143 240.033);
+--color-info-content: oklch(12.523% 0.028 240.033);
+--color-success: oklch(70.226% 0.094 156.596);
+--color-success-content: oklch(14.045% 0.018 156.596);
+--color-warning: oklch(77.482% 0.115 81.519);
+--color-warning-content: oklch(15.496% 0.023 81.519);
+--color-error: oklch(51.61% 0.146 29.674);
+--color-error-content: oklch(90.322% 0.029 29.674);
+--radius-selector: 0rem; --radius-field: 0.25rem; --radius-box: 0.25rem;
+--size-selector: 0.25rem; --size-field: 0.25rem;
+--border: 1px; --depth: 0; --noise: 0;
+```
+
+> **Rule:** Store these **OKLCH** values in `src/ui/theme-tokens.ts`. Convert to sRGB hex **at build time** (e.g., with `colorjs.io`) and feed the derived hexes into UI Kitten.
+
+### UI Kitten mapping (required overrides)
+
+* **Light theme overrides**
+
+  * `background-basic-color-1` ← `--color-base-100`
+  * `background-basic-color-2` ← `--color-base-200`
+  * `background-basic-color-3` ← `--color-base-300`
+  * `text-basic-color` ← `--color-base-content`
+  * `color-primary-500` ← `--color-primary`
+  * `color-info-500` ← `--color-info`
+  * `color-success-500` ← `--color-success`
+  * `color-warning-500` ← `--color-warning`
+  * `color-danger-500` ← `--color-error`
+
+* **Dark theme overrides**
+
+  * `background-basic-color-1` ← `--color-base-100`
+  * `background-basic-color-2` ← `--color-base-200`
+  * `background-basic-color-3` ← `--color-base-300`
+  * `text-basic-color` ← `--color-base-content`
+  * `color-primary-500` ← `--color-primary`
+  * `color-info-500` ← `--color-info`
+  * `color-success-500` ← `--color-success`
+  * `color-warning-500` ← `--color-warning`
+  * `color-danger-500` ← `--color-error`
+
+**Notes**
+
+* Let **Eva** generate the rest of the scale; override only `-500` and base/background/text tokens listed above.
+* Keep **triple switcher**: light → dark → system. Persist in `SecureStore`.
+* Ensure minimum contrast ratio 4.5:1 for text on backgrounds.
 
 ## Env & Builds
 
@@ -112,3 +198,17 @@ alwaysApply: true
 * [ ] Biometric prompt enforced where needed
 * [ ] Env vars read from `EXPO_PUBLIC_*`
 * [ ] Brand/theme unchanged or updated consistently in both light & dark
+
+## Upgrade Policy (SDK 54)
+
+* Follow Expo’s official upgrade guide. Run:
+
+  * `npm i expo@^54` → `npx expo install --fix` → `npx expo-doctor`.
+  * If using prebuild, delete `ios/` & `android/` before regenerating when moving major SDKs.
+* Review SDK 54 changelog for breaking changes (e.g., precompiled RN for iOS, new iOS 26 features). Adjust build configs accordingly.
+
+## References
+
+* Upgrading walkthrough: [https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/)
+* SDK 54 changelog: [https://expo.dev/changelog/sdk-54](https://expo.dev/changelog/sdk-54)
+* Expo guides overview: [https://docs.expo.dev/guides/overview/](https://docs.expo.dev/guides/overview/)

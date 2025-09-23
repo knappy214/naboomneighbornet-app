@@ -1,0 +1,11 @@
+{
+  "background-basic-color-1": "#3e3e3e",
+  "background-basic-color-2": "#393939",
+  "background-basic-color-3": "#353535",
+  "text-basic-color": "#d8d8d8",
+  "color-primary-500": "#5a4fcf",
+  "color-info-500": "#4a90e2",
+  "color-success-500": "#7cb342",
+  "color-warning-500": "#ffb300",
+  "color-danger-500": "#ff6b6b"
+}
