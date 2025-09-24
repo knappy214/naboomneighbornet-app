@@ -34,8 +34,8 @@ This project includes a comprehensive Panic Menu implementation with the followi
 
 The app uses OKLCH color tokens as specified in the project rules:
 
-- **Light Theme**: Clean, agricultural color palette
-- **Dark Theme**: Optimized for low-light conditions
+- **Light Theme**: Clean, light palette
+- **Dark Theme**: business palette
 - **System Theme**: Follows device preference
 
 ### 🌐 **Internationalization**

@@ -5,8 +5,8 @@ const DEFAULT_API_V2_BASE = "https://naboomneighbornet.net.za/api/v2";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Naboom NeighborNet",
-  slug: "naboomneighbornet-app",
+  name: "Naboom ommunity Hub",
+  slug: "naboom-community-hub",
   scheme: "naboom",
   version: config.version ?? "1.0.0",
   orientation: "portrait",
@@ -22,6 +22,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       NSLocationWhenInUseUsageDescription: "This app uses your location to assist community response.",
       NSLocationAlwaysAndWhenInUseUsageDescription: "Background location enables patrol tracking.",
       UIBackgroundModes: ["location"],
+    },
+    runtimeVersion: {
+      policy: "appVersion"
     },
   },
   android: {
@@ -42,9 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "BLUETOOTH_CONNECT",
       "BLUETOOTH_SCAN",
     ],
-    foregroundService: {
-      notificationChannelName: "Location",
-    },
+    runtimeVersion: "1.0.0",
   },
   web: {
     bundler: "metro",
@@ -70,15 +71,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true,
   },
+  updates: {
+    url: "https://u.expo.dev/8185949e-7c8e-4a64-b0a1-b4a732a69b2d"
+  },
   extra: {
     ...config.extra,
+    eas: {
+      projectId: "8185949e-7c8e-4a64-b0a1-b4a732a69b2d"
+    },
     apiBase: process.env.EXPO_PUBLIC_API_BASE || DEFAULT_API_BASE,
     apiV2Base: process.env.EXPO_PUBLIC_API_V2_BASE || DEFAULT_API_V2_BASE,
     enableRelay: process.env.EXPO_PUBLIC_ENABLE_RELAY === '1',
     enableTracking: process.env.EXPO_PUBLIC_ENABLE_TRACKING === '1',
     brand: {
-      light: { primary: "#4b6bfb", secondary: "#047aff", accent: "#f97316" },
-      dark: { primary: "#60a5fa", secondary: "#38bdf8", accent: "#fb923c" },
+      light: { primary: "#6b3aa0", secondary: "#f43098", accent: "#00d3bb" },
+      dark: { primary: "#422ad5", secondary: "#f43098", accent: "#00d3bb" },
     },
   },
 });

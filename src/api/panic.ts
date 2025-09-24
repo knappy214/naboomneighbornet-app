@@ -1,5 +1,6 @@
 import { config } from '../config/environment';
 import { acceptLanguageHeader } from '../i18n';
+import { api } from '../lib/wagtailApi';
 
 const API_BASE = config.apiBase;
 
@@ -218,7 +219,7 @@ export const panicApi = {
     return http.request<{ results: PatrolAlert[] }>(url);
   },
 
-  // Get responders
+  // Get responders (using Wagtail API endpoint as per PANIC.md)
   async getResponders(params: {
     province?: string;
   } = {}): Promise<{ results: Responder[] }> {
@@ -226,9 +227,45 @@ export const panicApi = {
     if (params.province) searchParams.append('province', params.province);
     
     const queryString = searchParams.toString();
-    const url = `/panic/api/responders/${queryString ? `?${queryString}` : ''}`;
+    const path = `/responders/${queryString ? `?${queryString}` : ''}`;
     
-    return http.request<{ results: Responder[] }>(url);
+    console.log('🔍 [PANIC API] Making request to:', path);
+    
+    // Use JWT-enabled API with auto-refresh
+    const response = await api.get<any>(path);
+    
+    console.log('🔍 [PANIC API] Raw response from server:', response);
+    console.log('🔍 [PANIC API] Response type:', typeof response);
+    console.log('🔍 [PANIC API] Response keys:', response ? Object.keys(response) : 'null/undefined');
+    
+    // Handle different response structures
+    if (response && typeof response === 'object') {
+      if (Array.isArray(response)) {
+        // Direct array response
+        console.log('🔍 [PANIC API] Response is direct array, wrapping in results');
+        return { results: response };
+      } else if (response.results) {
+        // Standard { results: [...] } structure
+        console.log('🔍 [PANIC API] Response has results property');
+        return response;
+      } else if (response.items) {
+        // Wagtail API structure: { meta: {...}, items: [...] }
+        console.log('🔍 [PANIC API] Response has items property (Wagtail API), mapping to results');
+        return { results: response.items };
+      } else if (response.data) {
+        // Alternative { data: [...] } structure
+        console.log('🔍 [PANIC API] Response has data property, mapping to results');
+        return { results: response.data };
+      } else {
+        // Single object response, wrap in array
+        console.log('🔍 [PANIC API] Response is single object, wrapping in array');
+        return { results: [response] };
+      }
+    }
+    
+    // Fallback for unexpected response
+    console.warn('🔍 [PANIC API] Unexpected response structure, returning empty results');
+    return { results: [] };
   },
 
   // Get waypoints
@@ -243,6 +280,7 @@ export const panicApi = {
     
     return http.request<{ results: Waypoint[] }>(url);
   },
+
 
   // Get live vehicle positions
   async getLiveVehicles(): Promise<{ type: 'FeatureCollection'; features: any[] }> {

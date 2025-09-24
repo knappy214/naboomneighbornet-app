@@ -63,9 +63,9 @@ export const useOptimizedTheme = () => {
     },
     // Background colors
     background: {
-      basic: theme['color-basic-100'],
-      alternative: theme['color-basic-200'],
-      disabled: theme['color-basic-300'],
+      basic: theme['background-basic-color-1'],
+      alternative: theme['background-basic-color-2'],
+      disabled: theme['background-basic-color-3'],
     },
   }), [theme]);
 };

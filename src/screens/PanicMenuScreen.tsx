@@ -13,9 +13,11 @@ import {
     useTheme,
 } from '@ui-kitten/components';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet } from 'react-native';
 import { panicApi } from '../api/panic';
+import { useAuth } from '../context/AuthProvider';
 import { useTranslation } from '../i18n';
 import { useThemeCtx } from '../ui/ThemeProvider';
 
@@ -25,16 +27,105 @@ interface MenuAction {
   description: string;
   icon: string;
   action: () => Promise<void>;
-  variant?: 'primary' | 'secondary' | 'accent' | 'danger';
+  status?: 'primary' | 'success' | 'info' | 'warning' | 'danger';
 }
 
 export default function PanicMenuScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const { mode, toggleTheme } = useThemeCtx();
+  const { logout } = useAuth();
   const [loading, setLoading] = useState<string | null>(null);
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  // Enhanced error handling with JWT refresh flow
+  const handleApiError = async (error: unknown, actionName: string): Promise<void> => {
+    console.log('Processing error:', error);
+    
+    if (error instanceof Error) {
+      console.log('Error message:', error.message);
+      
+      // Handle 401 Unauthorized - try refresh first, then logout
+      if (error.message.includes('401')) {
+        console.log('🔄 [PANIC] 401 received, attempting token refresh...');
+        
+        try {
+          // The wagtailApi already handles refresh automatically, but if we get here
+          // it means refresh failed, so we need to logout and redirect to login
+          console.log('❌ [PANIC] Token refresh failed, logging out and redirecting to login');
+          await logout();
+          
+          // Show user-friendly message and redirect to login
+          if (Platform.OS === 'web') {
+            // Use browser alert for web platform
+            const confirmed = window.confirm('Your session has expired. Please log in again.');
+            if (confirmed) {
+              router.push('/(auth)/login');
+            }
+          } else {
+            Alert.alert(
+              'Session Expired',
+              'Your session has expired. Please log in again.',
+              [
+                {
+                  text: 'Login',
+                  onPress: () => router.push('/(auth)/login'),
+                  style: 'default'
+                }
+              ]
+            );
+          }
+          return;
+        } catch (logoutError) {
+          console.error('❌ [PANIC] Logout failed:', logoutError);
+        }
+      }
+      
+      // Handle other errors
+      let errorMessage = 'An unexpected error occurred. Please try again.';
+      
+      if (error.message.includes('404')) {
+        errorMessage = 'Service not found (404). The API endpoint may be misconfigured. Please contact support.';
+      } else if (error.message.includes('403')) {
+        errorMessage = 'Access denied. You do not have permission to perform this action.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please check your connection and try again.';
+      } else if (error.message.includes('Network') || error.message.includes('fetch')) {
+        errorMessage = 'Network connection failed. Please check your internet connection.';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Server error. Please try again later.';
+      } else {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      // Show error alert
+      if (Platform.OS === 'web') {
+        // Use browser alert for web platform
+        window.alert(`${t('messages.error') || 'Error'}: ${errorMessage}`);
+      } else {
+        Alert.alert(
+          t('messages.error') || 'Error',
+          errorMessage,
+          [{ text: 'OK', style: 'default' }]
+        );
+      }
+    } else {
+      // Fallback for unknown errors
+      const fallbackMessage = t('messages.networkError') || 'An unexpected error occurred. Please try again.';
+      
+      if (Platform.OS === 'web') {
+        // Use browser alert for web platform
+        window.alert(`${t('messages.error') || 'Error'}: ${fallbackMessage}`);
+      } else {
+        Alert.alert(
+          t('messages.error') || 'Error',
+          fallbackMessage,
+          [{ text: 'OK', style: 'default' }]
+        );
+      }
+    }
+  };
 
   // Get current location
   const getCurrentLocation = async () => {
@@ -64,7 +155,7 @@ export default function PanicMenuScreen() {
       title: t('panic.submitIncident'),
       description: t('panic.submitIncidentDesc'),
       icon: 'alert-circle-outline',
-      variant: 'danger',
+      status: 'danger',
       action: async () => {
         setLoading('submit-incident');
         try {
@@ -82,13 +173,20 @@ export default function PanicMenuScreen() {
           };
 
           const response = await panicApi.submitIncident(incidentData);
+          console.log('🔍 [PANIC] Incident submission response:', response);
+          console.log('🔍 [PANIC] Response structure:', {
+            hasReference: 'reference' in response,
+            referenceValue: response.reference,
+            responseKeys: Object.keys(response)
+          });
+          
           Alert.alert(
             t('messages.success'),
             `${t('messages.incidentSubmitted')}\nReference: ${response.reference}`
           );
         } catch (error) {
           console.error('Error submitting incident:', error);
-          Alert.alert(t('messages.error'), t('messages.incidentSubmittedError'));
+          await handleApiError(error, 'submit-incident');
         } finally {
           setLoading(null);
         }
@@ -99,7 +197,7 @@ export default function PanicMenuScreen() {
       title: t('panic.viewIncidents'),
       description: t('panic.viewIncidentsDesc'),
       icon: 'list-outline',
-      variant: 'primary',
+      status: 'primary',
       action: async () => {
         setLoading('view-incidents');
         try {
@@ -122,7 +220,7 @@ export default function PanicMenuScreen() {
       title: t('panic.manageContacts'),
       description: t('panic.manageContactsDesc'),
       icon: 'people-outline',
-      variant: 'secondary',
+      status: 'success',
       action: async () => {
         setLoading('manage-contacts');
         try {
@@ -157,7 +255,7 @@ export default function PanicMenuScreen() {
       title: t('panic.registerPush'),
       description: t('panic.registerPushDesc'),
       icon: 'bell-outline',
-      variant: 'accent',
+      status: 'info',
       action: async () => {
         setLoading('register-push');
         try {
@@ -183,7 +281,7 @@ export default function PanicMenuScreen() {
       title: t('panic.viewAlerts'),
       description: t('panic.viewAlertsDesc'),
       icon: 'shield-outline',
-      variant: 'primary',
+      status: 'primary',
       action: async () => {
         setLoading('view-alerts');
         try {
@@ -206,22 +304,10 @@ export default function PanicMenuScreen() {
       title: t('panic.viewResponders'),
       description: t('panic.viewRespondersDesc'),
       icon: 'person-outline',
-      variant: 'secondary',
+      status: 'success',
       action: async () => {
-        setLoading('view-responders');
-        try {
-          const response = await panicApi.getResponders();
-          const responderCount = response.results.length;
-          Alert.alert(
-            t('panic.viewResponders'),
-            `${responderCount} ${responderCount === 1 ? 'responder' : 'responders'} available`
-          );
-        } catch (error) {
-          console.error('Error fetching responders:', error);
-          Alert.alert(t('messages.error'), t('messages.networkError'));
-        } finally {
-          setLoading(null);
-        }
+        // Navigate to the new tabs screen instead of showing alert
+        router.push('/panic-tabs' as any);
       },
     },
     {
@@ -229,19 +315,36 @@ export default function PanicMenuScreen() {
       title: t('panic.vehicleTracking'),
       description: t('panic.vehicleTrackingDesc'),
       icon: 'car-outline',
-      variant: 'accent',
+      status: 'info',
       action: async () => {
         setLoading('vehicle-tracking');
         try {
           const response = await panicApi.getLiveVehicles();
-          const vehicleCount = response.features.length;
+          console.log('🔍 [PANIC] Vehicles API Response:', response);
+          console.log('🔍 [PANIC] Response structure:', {
+            hasFeatures: 'features' in response,
+            featuresType: typeof response.features,
+            featuresLength: response.features?.length,
+            responseKeys: Object.keys(response)
+          });
+          
+          // Handle different response structures
+          const vehicles = response.features || (response as any).data || response;
+          const vehicleCount = Array.isArray(vehicles) ? vehicles.length : 0;
+          
+          console.log('🔍 [PANIC] Processed vehicles:', {
+            vehicles,
+            vehicleCount,
+            isArray: Array.isArray(vehicles)
+          });
+          
           Alert.alert(
             t('panic.vehicleTracking'),
             `${vehicleCount} ${vehicleCount === 1 ? 'vehicle' : 'vehicles'} tracked`
           );
         } catch (error) {
           console.error('Error fetching vehicles:', error);
-          Alert.alert(t('messages.error'), t('messages.networkError'));
+          await handleApiError(error, 'vehicle-tracking');
         } finally {
           setLoading(null);
         }
@@ -252,7 +355,7 @@ export default function PanicMenuScreen() {
       title: t('panic.waypoints'),
       description: t('panic.waypointsDesc'),
       icon: 'map-outline',
-      variant: 'primary',
+      status: 'primary',
       action: async () => {
         setLoading('waypoints');
         try {
@@ -277,7 +380,7 @@ export default function PanicMenuScreen() {
       key={action.id}
       style={[
         styles.menuCard,
-        { backgroundColor: theme[`color-${action.variant || 'primary'}-100`] },
+        { backgroundColor: theme[`color-${action.status || 'primary'}-100`] },
       ]}
     >
       <Layout style={styles.menuItem}>
@@ -285,7 +388,7 @@ export default function PanicMenuScreen() {
           name={action.icon}
           style={[
             styles.menuIcon,
-            { tintColor: theme[`color-${action.variant || 'primary'}-500`] },
+            { tintColor: theme[`color-${action.status || 'primary'}-500`] },
           ]}
         />
         <Layout style={styles.menuContent}>
@@ -298,7 +401,7 @@ export default function PanicMenuScreen() {
         </Layout>
         <Button
           size="small"
-          status={action.variant || 'primary'}
+          status={action.status || 'primary'}
           onPress={action.action}
           disabled={loading === action.id}
           accessoryLeft={loading === action.id ? () => <Spinner size="small" /> : undefined}

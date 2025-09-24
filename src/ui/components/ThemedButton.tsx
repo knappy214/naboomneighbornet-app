@@ -17,15 +17,15 @@ export const ThemedButton: React.FC<ThemedButtonProps> = ({
     
     switch (variant) {
       case 'primary':
-        return { backgroundColor: theme['color-primary-500'] || '#6b4f2a' };
+        return { backgroundColor: theme['color-primary-500'] || '#6b3aa0' };
       case 'secondary':
-        return { backgroundColor: theme['color-success-500'] || '#3a7d44' };
+        return { backgroundColor: theme['color-success-500'] || '#7cb342' };
       case 'success':
-        return { backgroundColor: theme['color-success-500'] || '#3a7d44' };
+        return { backgroundColor: theme['color-success-500'] || '#7cb342' };
       case 'warning':
-        return { backgroundColor: theme['color-warning-500'] || '#f6b40e' };
+        return { backgroundColor: theme['color-warning-500'] || '#ffb300' };
       case 'danger':
-        return { backgroundColor: theme['color-danger-500'] || '#c0392b' };
+        return { backgroundColor: theme['color-danger-500'] || '#e53e3e' };
       default:
         return {};
     }

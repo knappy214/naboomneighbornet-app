@@ -14,7 +14,7 @@ export const PerformanceOptimizedLayout = memo<PerformanceOptimizedLayoutProps>(
   const theme = useTheme();
 
   const defaultStyle = {
-    backgroundColor: theme?.['color-basic-100'] || '#ffffff',
+    backgroundColor: theme?.['background-basic-color-1'] || '#ffffff',
     flex: 1,
   };
 
