@@ -84,8 +84,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     enableRelay: process.env.EXPO_PUBLIC_ENABLE_RELAY === '1',
     enableTracking: process.env.EXPO_PUBLIC_ENABLE_TRACKING === '1',
     brand: {
-      light: { primary: "#6b3aa0", secondary: "#f43098", accent: "#00d3bb" },
-      dark: { primary: "#422ad5", secondary: "#f43098", accent: "#00d3bb" },
+      light: { primary: "#422ad5", secondary: "#f43098", accent: "#00d3bb" },
+      dark: { primary: "#1c4e80", secondary: "#7c909a", accent: "#ea6947" },
     },
   },
 });

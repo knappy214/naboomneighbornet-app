@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Button,
   Card,
   Divider,
@@ -13,8 +12,8 @@ import {
   useTheme
 } from '@ui-kitten/components';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Platform, ScrollView, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Platform, ScrollView, StyleSheet } from 'react-native';
 import { panicApi, type PatrolAlert as ApiPatrolAlert, type Responder as ApiResponder, type IncidentResponse } from '../api/panic';
 import { useAuth } from '../context/AuthProvider';
 import { useTranslation } from '../i18n';
@@ -53,7 +52,7 @@ export default function PanicTabsScreen() {
   });
 
   // Enhanced error handling with JWT refresh flow
-  const handleApiError = async (error: unknown, actionName: string): Promise<void> => {
+  const handleApiError = useCallback(async (error: unknown, actionName: string): Promise<void> => {
     console.log('Processing error:', error);
     
     if (error instanceof Error) {
@@ -75,7 +74,6 @@ export default function PanicTabsScreen() {
             }
           } else {
             // Use native Alert for mobile
-            const { Alert } = require('react-native');
             Alert.alert(
               'Session Expired',
               'Your session has expired. Please log in again.',
@@ -115,7 +113,6 @@ export default function PanicTabsScreen() {
       if (Platform.OS === 'web') {
         window.alert(`${t('messages.error') || 'Error'}: ${errorMessage}`);
       } else {
-        const { Alert } = require('react-native');
         Alert.alert(
           t('messages.error') || 'Error',
           errorMessage,
@@ -123,10 +120,10 @@ export default function PanicTabsScreen() {
         );
       }
     }
-  };
+  }, [logout, t]);
 
   // Load data for each tab
-  const loadResponders = async () => {
+  const loadResponders = useCallback(async () => {
     setLoading(prev => ({ ...prev, responders: true }));
     try {
       const response = await panicApi.getResponders();
@@ -138,9 +135,9 @@ export default function PanicTabsScreen() {
     } finally {
       setLoading(prev => ({ ...prev, responders: false }));
     }
-  };
+  }, [handleApiError]);
 
-  const loadVehicles = async () => {
+  const loadVehicles = useCallback(async () => {
     setLoading(prev => ({ ...prev, vehicles: true }));
     try {
       const response = await panicApi.getLiveVehicles();
@@ -152,9 +149,9 @@ export default function PanicTabsScreen() {
     } finally {
       setLoading(prev => ({ ...prev, vehicles: false }));
     }
-  };
+  }, [handleApiError]);
 
-  const loadIncidents = async () => {
+  const loadIncidents = useCallback(async () => {
     setLoading(prev => ({ ...prev, incidents: true }));
     try {
       const response = await panicApi.getIncidents();
@@ -166,9 +163,9 @@ export default function PanicTabsScreen() {
     } finally {
       setLoading(prev => ({ ...prev, incidents: false }));
     }
-  };
+  }, [handleApiError]);
 
-  const loadAlerts = async () => {
+  const loadAlerts = useCallback(async () => {
     setLoading(prev => ({ ...prev, alerts: true }));
     try {
       const response = await panicApi.getPatrolAlerts();
@@ -180,7 +177,7 @@ export default function PanicTabsScreen() {
     } finally {
       setLoading(prev => ({ ...prev, alerts: false }));
     }
-  };
+  }, [handleApiError]);
 
   // Load data when tab changes
   useEffect(() => {
@@ -198,53 +195,23 @@ export default function PanicTabsScreen() {
         if (data.alerts.length === 0) loadAlerts();
         break;
     }
-  }, [selectedIndex]);
+  }, [selectedIndex, data.responders.length, data.vehicles.length, data.incidents.length, data.alerts.length, loadResponders, loadVehicles, loadIncidents, loadAlerts]);
 
   // Render responder item
   const renderResponderItem = ({ item }: { item: ApiResponder }) => {
-    console.log('🔍 [PANIC TABS] Rendering responder item:', {
-      id: item.id,
-      name: item.name,
-      province: item.province,
-      phone_number: item.phone_number,
-      is_active: item.is_active
-    });
-    
-    // Safely extract and validate text values
-    const fullName = (item.name || '').trim() || 'Unknown Name';
-    const responderType = 'Responder'; // API doesn't have responder_type, use generic
-    const province = (item.province || '').trim() || 'Unknown Province';
-    const phoneNumber = (item.phone_number || '').trim();
-    
     return (
       <Card style={styles.listItem} status="basic">
-        <Layout style={styles.itemHeader}>
-          <Avatar
-            source={{ uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=random` }}
-            size="medium"
-          />
-          <Layout style={styles.itemContent}>
-            <Text category="h6">{fullName}</Text>
-            <Text category="c1" appearance="hint">
-              {responderType && province ? `${responderType} • ${province}` : responderType || province || 'Unknown Details'}
-            </Text>
-            {phoneNumber && (
-              <Text category="c2" appearance="hint">
-                📞 {phoneNumber}
-              </Text>
-            )}
-          </Layout>
-          <Button
-            size="tiny"
-            status={item.is_active ? 'success' : 'basic'}
-            onPress={() => {
-              // Handle contact responder
-              console.log('Contact responder:', item.id);
-            }}
-          >
-            Contact
-          </Button>
-        </Layout>
+        <Text category="h6">{item.full_name || 'Unknown Name'}</Text>
+        <Text category="c1" appearance="hint">
+          {item.responder_type || 'Responder'} - {item.province || 'Unknown Province'}
+        </Text>
+        <Button
+          size="tiny"
+          status={item.is_active ? 'success' : 'basic'}
+          onPress={() => console.log('Contact responder:', item.id)}
+        >
+          Contact
+        </Button>
       </Card>
     );
   };
@@ -310,7 +277,7 @@ export default function PanicTabsScreen() {
           <Layout style={styles.itemContent}>
             <Text category="h6">{summary}</Text>
             <Text category="c1" appearance="hint">
-              {type && priority && status ? `${type} • ${priority.toUpperCase()} • ${status.toUpperCase()}` : type || priority || status || 'Unknown Details'}
+              {`${type} • ${priority.toUpperCase()} • ${status.toUpperCase()}`}
             </Text>
             <Text category="c2" appearance="hint">
               📅 {item.created_at ? new Date(item.created_at).toLocaleString() : 'Unknown Date'}

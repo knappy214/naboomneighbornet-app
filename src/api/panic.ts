@@ -87,10 +87,12 @@ export interface PatrolAlert {
 
 export interface Responder {
   id: number;
-  name: string;
+  full_name: string;
   phone_number?: string;
   province?: string;
   is_active: boolean;
+  email?: string;
+  responder_type?: string;
 }
 
 export interface Waypoint {
