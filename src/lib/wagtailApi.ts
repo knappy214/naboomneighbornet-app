@@ -7,8 +7,8 @@
 //   - expo-localization
 //
 // Env vars (Expo):
-//   EXPO_PUBLIC_API_BASE    => e.g. https://naboomneighbornet.net.za/api
-//   EXPO_PUBLIC_API_V2_BASE => e.g. https://naboomneighbornet.net.za/api/v2
+//   EXPO_PUBLIC_API_BASE    => e.g. https://naboomneighbornet.net.za (for Django view endpoints)
+//   EXPO_PUBLIC_API_V2_BASE => e.g. https://naboomneighbornet.net.za/api/v2 (for Wagtail API endpoints)
 
 import * as Localization from 'expo-localization'
 import * as SecureStore from 'expo-secure-store'
@@ -32,7 +32,7 @@ function ensureBase(url: string | undefined, fallback: string): string {
   return trimSlashes(fallback)
 }
 
-const API_BASE = ensureBase(RAW_API_BASE, 'https://naboomneighbornet.net.za/api')
+const API_BASE = ensureBase(RAW_API_BASE, 'https://naboomneighbornet.net.za')
 const API_V2_BASE = ensureBase(RAW_API_V2_BASE, 'https://naboomneighbornet.net.za/api/v2')
 
 // Language header: match Vue app behavior: 'af-ZA' when locale starts with 'af', else 'en'

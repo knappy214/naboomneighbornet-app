@@ -1,6 +1,6 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 
-const DEFAULT_API_BASE = "https://naboomneighbornet.net.za/api";
+const DEFAULT_API_BASE = "https://naboomneighbornet.net.za";
 const DEFAULT_API_V2_BASE = "https://naboomneighbornet.net.za/api/v2";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({

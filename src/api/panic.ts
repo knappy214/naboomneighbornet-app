@@ -189,7 +189,7 @@ export const panicApi = {
     });
   },
 
-  // Get incidents (with optional filters)
+  // Get incidents (with optional filters) - using Wagtail API for Expo client
   async getIncidents(params: {
     status?: string;
     province?: string;
@@ -201,12 +201,48 @@ export const panicApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
     
     const queryString = searchParams.toString();
-    const url = `/panic/api/incidents/${queryString ? `?${queryString}` : ''}`;
+    const path = `/incidents/${queryString ? `?${queryString}` : ''}`;
     
-    return http.request<{ results: IncidentResponse[] }>(url);
+    console.log('🔍 [PANIC API] Making request to Wagtail API:', path);
+    
+    // Use JWT-enabled API with auto-refresh
+    const response = await api.get<any>(path);
+    
+    console.log('🔍 [PANIC API] Raw response from server:', response);
+    console.log('🔍 [PANIC API] Response type:', typeof response);
+    console.log('🔍 [PANIC API] Response keys:', response ? Object.keys(response) : 'null/undefined');
+    
+    // Handle different response structures
+    if (response && typeof response === 'object') {
+      if (Array.isArray(response)) {
+        // Direct array response
+        console.log('🔍 [PANIC API] Response is direct array, wrapping in results');
+        return { results: response };
+      } else if (response.results) {
+        // Standard { results: [...] } structure
+        console.log('🔍 [PANIC API] Response has results property');
+        return response;
+      } else if (response.items) {
+        // Wagtail API structure: { meta: {...}, items: [...] }
+        console.log('🔍 [PANIC API] Response has items property (Wagtail API), mapping to results');
+        return { results: response.items };
+      } else if (response.data) {
+        // Alternative { data: [...] } structure
+        console.log('🔍 [PANIC API] Response has data property, mapping to results');
+        return { results: response.data };
+      } else {
+        // Single object response, wrap in array
+        console.log('🔍 [PANIC API] Response is single object, wrapping in array');
+        return { results: [response] };
+      }
+    }
+    
+    // Fallback for unexpected response
+    console.warn('🔍 [PANIC API] Unexpected response structure, returning empty results');
+    return { results: [] };
   },
 
-  // Get patrol alerts
+  // Get patrol alerts - using Wagtail API for Expo client
   async getPatrolAlerts(params: {
     shift?: string;
     limit?: number;
@@ -216,9 +252,45 @@ export const panicApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
     
     const queryString = searchParams.toString();
-    const url = `/panic/api/alerts/${queryString ? `?${queryString}` : ''}`;
+    const path = `/alerts/${queryString ? `?${queryString}` : ''}`;
     
-    return http.request<{ results: PatrolAlert[] }>(url);
+    console.log('🔍 [PANIC API] Making request to Wagtail API:', path);
+    
+    // Use JWT-enabled API with auto-refresh
+    const response = await api.get<any>(path);
+    
+    console.log('🔍 [PANIC API] Raw response from server:', response);
+    console.log('🔍 [PANIC API] Response type:', typeof response);
+    console.log('🔍 [PANIC API] Response keys:', response ? Object.keys(response) : 'null/undefined');
+    
+    // Handle different response structures
+    if (response && typeof response === 'object') {
+      if (Array.isArray(response)) {
+        // Direct array response
+        console.log('🔍 [PANIC API] Response is direct array, wrapping in results');
+        return { results: response };
+      } else if (response.results) {
+        // Standard { results: [...] } structure
+        console.log('🔍 [PANIC API] Response has results property');
+        return response;
+      } else if (response.items) {
+        // Wagtail API structure: { meta: {...}, items: [...] }
+        console.log('🔍 [PANIC API] Response has items property (Wagtail API), mapping to results');
+        return { results: response.items };
+      } else if (response.data) {
+        // Alternative { data: [...] } structure
+        console.log('🔍 [PANIC API] Response has data property, mapping to results');
+        return { results: response.data };
+      } else {
+        // Single object response, wrap in array
+        console.log('🔍 [PANIC API] Response is single object, wrapping in array');
+        return { results: [response] };
+      }
+    }
+    
+    // Fallback for unexpected response
+    console.warn('🔍 [PANIC API] Unexpected response structure, returning empty results');
+    return { results: [] };
   },
 
   // Get responders (using Wagtail API endpoint as per PANIC.md)
@@ -341,14 +413,14 @@ export const wagtailApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
     
     const queryString = searchParams.toString();
-    const url = `/api/v2/panic/incidents/${queryString ? `?${queryString}` : ''}`;
+    const url = `/api/v2/incidents/${queryString ? `?${queryString}` : ''}`;
     
     return http.request<{ results: IncidentResponse[]; meta: any }>(url);
   },
 
   // Get single incident
   async getIncident(incidentId: number): Promise<IncidentResponse> {
-    return http.request<IncidentResponse>(`/api/v2/panic/incidents/${incidentId}/`);
+    return http.request<IncidentResponse>(`/api/v2/incidents/${incidentId}/`);
   },
 
   // Get responders via Wagtail API
@@ -359,7 +431,7 @@ export const wagtailApi = {
     if (params.province) searchParams.append('province', params.province);
     
     const queryString = searchParams.toString();
-    const url = `/api/v2/panic/responders/${queryString ? `?${queryString}` : ''}`;
+    const url = `/api/v2/responders/${queryString ? `?${queryString}` : ''}`;
     
     return http.request<{ results: Responder[] }>(url);
   },
@@ -374,13 +446,13 @@ export const wagtailApi = {
     if (params.limit) searchParams.append('limit', params.limit.toString());
     
     const queryString = searchParams.toString();
-    const url = `/api/v2/panic/alerts/${queryString ? `?${queryString}` : ''}`;
+    const url = `/api/v2/alerts/${queryString ? `?${queryString}` : ''}`;
     
     return http.request<{ results: PatrolAlert[] }>(url);
   },
 
   // Get single patrol alert
   async getPatrolAlert(alertId: number): Promise<PatrolAlert> {
-    return http.request<PatrolAlert>(`/api/v2/panic/alerts/${alertId}/`);
+    return http.request<PatrolAlert>(`/api/v2/alerts/${alertId}/`);
   },
 };

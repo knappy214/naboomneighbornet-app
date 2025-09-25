@@ -1,6 +1,7 @@
 // =========================
 // src/context/AuthProvider.tsx
 // =========================
+import { router } from 'expo-router'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { queryClient } from '../lib/query'
 import type { ProfileT } from '../lib/schemas'
@@ -119,8 +120,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     const off = api.addUnauthorizedListener(() => {
       if (isMounted) {
+        console.log('🚨 AuthProvider: Unauthorized event received, redirecting to login...')
         setUser(null)
         queryClient.clear() // why: avoid stale private data after token loss
+        
+        // Redirect to login screen when token expires and cannot be refreshed
+        try {
+          router.replace('/(auth)/login')
+        } catch (error) {
+          console.error('❌ AuthProvider: Error redirecting to login:', error)
+        }
       }
     })
     
@@ -143,6 +152,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await api.logout()
     queryClient.clear()
     setUser(null)
+    
+    // Redirect to login screen after logout
+    try {
+      router.replace('/(auth)/login')
+    } catch (error) {
+      console.error('❌ AuthProvider: Error redirecting to login after logout:', error)
+    }
   }, [])
 
   const refreshProfile = useCallback(async () => {

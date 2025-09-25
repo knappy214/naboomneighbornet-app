@@ -3,7 +3,9 @@ import Constants from 'expo-constants';
 // Environment configuration
 export const config = {
   // API Configuration
+  // Base URL for Django view endpoints (e.g., /panic/api/...)
   apiBase: Constants.expoConfig?.extra?.apiBase || process.env.EXPO_PUBLIC_API_BASE || 'http://localhost:8000',
+  // Base URL for Wagtail API endpoints (e.g., /api/v2/...)
   apiV2Base: Constants.expoConfig?.extra?.apiV2Base || process.env.EXPO_PUBLIC_API_V2_BASE || 'http://localhost:8000/api/v2',
   
   // Feature Flags

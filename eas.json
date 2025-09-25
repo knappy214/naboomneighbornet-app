@@ -6,7 +6,7 @@
       "android": { "buildType": "apk" },
       "ios": { "simulator": false },
       "env": {
-        "EXPO_PUBLIC_API_BASE": "https://naboomneighbornet.net.za/api",
+        "EXPO_PUBLIC_API_BASE": "https://naboomneighbornet.net.za",
         "EXPO_PUBLIC_API_V2_BASE": "https://naboomneighbornet.net.za/api/v2",
         "EXPO_PUBLIC_VEHICLE_TOKEN": "<dev-vehicle-token>",
         "EXPO_PUBLIC_ENABLE_TRACKING": "1"
@@ -15,7 +15,7 @@
     "production": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_API_BASE": "https://naboomneighbornet.net.za/api",
+        "EXPO_PUBLIC_API_BASE": "https://naboomneighbornet.net.za",
         "EXPO_PUBLIC_API_V2_BASE": "https://naboomneighbornet.net.za/api/v2"
       }
     },
@@ -25,7 +25,7 @@
       "android": { "buildType": "apk" },
       "ios": { "simulator": false },
       "env": {
-        "EXPO_PUBLIC_API_BASE": "https://naboomneighbornet.net.za/api",
+        "EXPO_PUBLIC_API_BASE": "https://naboomneighbornet.net.za",
         "EXPO_PUBLIC_API_V2_BASE": "https://naboomneighbornet.net.za/api/v2",
         "EXPO_PUBLIC_ENABLE_RELAY": "1",
         "EXPO_PUBLIC_ENABLE_TRACKING": "1"
